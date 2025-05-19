@@ -13,6 +13,7 @@ function Hero() {
   const [amount, setAmount] = useState('');
   const [txStatus, setTxStatus] = useState('');
   const [txHash, setTxHash] = useState('');
+  const [activeTab, setActiveTab] = useState('onramp');
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -146,10 +147,68 @@ function Hero() {
         <button
           onClick={handleSendTokens}
           disabled={isPending}
-          className="w-full text-black p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          className="w-full mb-4 text-black p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
           {isPending ? 'Processing...' : 'Send'}
         </button>
+
+                {/* Onramp/Offramp Tabs */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('onramp')}
+              className={`flex-1 p-3 text-sm font-medium ${
+                activeTab === 'onramp' 
+                  ? 'text-black border-b-2 border-black' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Buy Crypto
+            </button>
+            <button
+              onClick={() => setActiveTab('offramp')}
+              className={`flex-1 p-3 text-sm font-medium ${
+                activeTab === 'offramp' 
+                  ? 'text-black border-b-2 border-black' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Cash Out
+            </button>
+          </div>
+          
+          <div className="p-4">
+            {activeTab === 'onramp' ? (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600">Select payment method:</p>
+                <button
+                 className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
+                  MOBILE MONEY
+                </button>
+                <button 
+                 className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
+                  MPESA
+                </button>
+                <div className="text-center text-xs text-gray-500 mt-2">
+                  Powered by Swypt • CC • OnPay
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600">Select withdrawal method:</p>
+                <button className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
+                  MPESA
+                </button>
+                <button className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
+                  Bank Transfer
+                </button>
+                <div className="text-center text-xs text-gray-500 mt-2">
+                  Supported Swypt:  • CC • OnPay
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Transaction Status */}
         {txHash && (
