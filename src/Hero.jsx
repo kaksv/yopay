@@ -68,6 +68,14 @@ function Hero() {
           <img src={onpaylogo1} alt="OnPay Logo" className="w-1/2 h-18" />
           {isConnected ? (
             <div className="bg-white p-2 rounded-md shadow-sm">
+              {/* Connection Status Message */}
+              <div className="flex items-center gap-1 mb-2">
+                {/* <div className="w-2 h-2 bg-green-500 rounded-full"></div> */}
+                <span className="text-sm text-gray-600">
+                  🔷 {chainId === lisk.id ? 'Lisk Mainnet' : 'Unknown Network'}
+                </span>
+                <hr className="h-px  bg-gray-800  dark:bg-gray-900" />
+              </div>
               <div className="flex justify-between items-center">
                 <p className="text-sm text-gray-600">
                   {address.slice(0, 6)}...{address.slice(-4)}
