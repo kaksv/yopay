@@ -39,20 +39,32 @@ function Hero() {
     const getExchangeRate = async () => {
       
     try {
-      const response = await axios.post('https://pool.swypt.io/api/swypt-quotes', {
-  type: "onramp",
-  amount: "1",
-  fiatCurrency: "KES",
-  cryptoCurrency: "USDT", //cKes, USDC
-  network: "lisk",
-}, {
+      const response = await fetch('https://pool.swypt.io/api/swypt-quotes', {
+  method: "POST",
+  mode: "cors",
   headers: {
     'Content-Type': 'application/json',
     'x-api-key': import.meta.env.VITE_API_KEY,
     'x-api-secret': import.meta.env.VITE_API_SECRET,
-  }
-});
-const requiredData = response.data;
+  },
+  body: JSON.stringify({
+     type: "onramp",
+  amount: "1",
+  fiatCurrency: "KES",
+  cryptoCurrency: "USDT", //cKes, USDC
+  network: "lisk",
+  })
+ 
+}, 
+// {
+//   headers: {
+//     'Content-Type': 'application/json',
+//     'x-api-key': import.meta.env.VITE_API_KEY,
+//     'x-api-secret': import.meta.env.VITE_API_SECRET,
+//   }
+// }
+);
+const requiredData =await  response.json();
 console.log(requiredData);
     }catch(error) {
       console.error(error);
