@@ -7,6 +7,7 @@ import { createWeb3Modal } from '@web3modal/wagmi/react'; // Correct import
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lisk, baseSepolia } from 'wagmi/chains'; // Import chains
 import './index.css';
+// import { CryptoProvider } from 'swypt-checkout';
 
 const queryClient = new QueryClient();
 
@@ -19,10 +20,12 @@ createWeb3Modal({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    {/* <CryptoProvider> */}
     <WagmiConfig config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     </WagmiConfig>
+{/* </CryptoProvider> */}
   </React.StrictMode>
 );

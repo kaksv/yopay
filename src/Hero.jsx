@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccount, useBalance, useChainId, useSwitchChain, useWriteContract, useDisconnect } from 'wagmi';
 import { lisk } from 'wagmi/chains';
 import { ethers } from 'ethers';
 import tokenAbi from './contracts/erc20Abi.mjs';
 import onpaylogo1 from '../src/assets/onpaylogo1.png';
+import axios from 'axios';
+// import Payment from './Modal.jsx'
+
 
 const liskUSDTAddress = '0x05D032ac25d322df992303dCa074EE7392C117b9';
 
@@ -14,6 +17,9 @@ function Hero() {
   const [txStatus, setTxStatus] = useState('');
   const [txHash, setTxHash] = useState('');
   const [activeTab, setActiveTab] = useState('onramp');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [recipentAddress2, setRecipentAddress2] = useState('');
+  const [kenyanamount, setKenyanAmount] = useState('');
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -25,6 +31,35 @@ function Hero() {
     address,
     token: liskUSDTAddress,
   });
+
+  useEffect(() => {
+    if (chainId !== lisk.id) {
+      switchChain?.(lisk.id);
+    }
+    const getExchangeRate = async () => {
+      
+    try {
+      const response = await axios.post('https://pool.swypt.io/api/swypt-quotes', {
+  type: "onramp",
+  amount: "1",
+  fiatCurrency: "KES",
+  cryptoCurrency: "USDT", //cKes, USDC
+  network: "lisk",
+}, {
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': import.meta.env.VITE_API_KEY,
+    'x-api-secret': import.meta.env.VITE_API_SECRET,
+  }
+});
+const requiredData = response.data;
+console.log(requiredData);
+    }catch(error) {
+      console.error(error);
+    }
+    };
+    getExchangeRate();
+  }, []);
 
   // Write contract hook
   const { writeContract, isPending } = useWriteContract({
@@ -62,7 +97,7 @@ function Hero() {
   };
 
   return (
-    <section className="bg-[#eaeaea] min-h-screen flex items-center justify-center">
+    <section className="bg-[#eaeaea] min-h-screen flex  items-center justify-center">
       <div className="bg-[#eaeaea] p-6 rounded-lg w-full max-w-md">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-4">
@@ -152,6 +187,8 @@ function Hero() {
           {isPending ? 'Processing...' : 'Send'}
         </button>
 
+
+
                 {/* Onramp/Offramp Tabs */}
         <div className="bg-white rounded-lg shadow-sm">
           <div className="flex border-b border-gray-200">
@@ -159,7 +196,7 @@ function Hero() {
               onClick={() => setActiveTab('onramp')}
               className={`flex-1 p-3 text-sm font-medium ${
                 activeTab === 'onramp' 
-                  ? 'text-black border-b-2 border-black' 
+                  ? 'text-black border-b-2 border-black ' 
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -180,28 +217,75 @@ function Hero() {
           <div className="p-4">
             {activeTab === 'onramp' ? (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">Select payment method:</p>
-                <button
-                 className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
-                  MOBILE MONEY
-                </button>
-                <button 
+                <p className="text-sm text-gray-600"> Payment method: MPESA</p>
+                {/* <p className="text-sm text-gray-600"> 1 KES ~ {getExchangeRate()}</p> */}
+                {/* <button
                  className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
                   MPESA
-                </button>
+                </button> */}
+                <input
+                    type="text"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder={"Enter your phone number"}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
+                  />
+
+                  <input
+                    type="text"
+                    value={recipentAddress2}
+                    onChange={(e) => setRecipentAddress2(e.target.value)}
+                    placeholder={"Enter your Wallet Address"}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
+                  />
+
+                  <input
+                    type="number"
+                    value={kenyanamount}
+                    onChange={(e) => setKenyanAmount(e.target.value)}
+                    placeholder={"100"}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
+                  />
+                  {/* Onramp button */}
+                 <button
+                    onClick=""
+                    disabled={isPending}
+                    className="w-full mb-4 text-black p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-none focus:ring-gray-500   "
+                  >
+                    {isPending ? 'Waiting for approval...' : 'GET USDT'}
+                  </button>
                 <div className="text-center text-xs text-gray-500 mt-2">
                   Powered by Swypt • CC • OnPay
                 </div>
               </div>
             ) : (
+
+
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">Select withdrawal method:</p>
-                <button className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
-                  MPESA
-                </button>
-                <button className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
-                  Bank Transfer
-                </button>
+                <p className="text-sm text-gray-600">Withdrawal method: MPESA</p>
+                <input
+                    type="text"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder={"Enter your phone number"}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
+                  />
+
+                  <input
+                    type="text"
+                    value={recipentAddress2}
+                    onChange={(e) => setRecipentAddress2(e.target.value)}
+                    placeholder={"Enter your Wallet Address"}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
+                  />
+                  {/* Onramp button */}
+                 <button
+                    onClick=""
+                    disabled={isPending}
+                    className="w-full mb-4 text-black p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-none focus:ring-gray-500   "
+                  >
+                    {isPending ? 'Waiting for approval...' : 'Withdraw to MPESA'}
+                  </button>
                 <div className="text-center text-xs text-gray-500 mt-2">
                   Supported Swypt:  • CC • OnPay
                 </div>
@@ -243,6 +327,9 @@ function Hero() {
           </div>
         )}
       </div>
+      {/* <div className='absolute flex justify-center items-center bottom-0 right-0 top-0 left-0' >
+      <Payment />
+      </div> */}
     </section>
   );
 }
