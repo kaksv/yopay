@@ -5,7 +5,6 @@ import { ethers } from 'ethers';
 import tokenAbi from './contracts/erc20Abi.mjs';
 import onpaylogo1 from '../src/assets/onpaylogo1.png';
 import axios from 'axios';
-// import Payment from './Modal.jsx'
 
 
 const liskUSDTAddress = '0x05D032ac25d322df992303dCa074EE7392C117b9';
@@ -20,6 +19,9 @@ function Hero() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [recipentAddress2, setRecipentAddress2] = useState('');
   const [kenyanamount, setKenyanAmount] = useState('');
+  const [responseObject, setResponseObject] = useState({}); //exchange rate
+  const [responseObject2, setResponseObject2] = useState({}); //handling estimated amount
+  const [responseObject3, setResponseObject3] = useState({}); //handling STK request
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -39,35 +41,25 @@ function Hero() {
     const getExchangeRate = async () => {
       
     try {
-      const response = await fetch('https://pool.swypt.io/api/swypt-quotes', {
-  method: "POST",
-  mode: "cors",
-  headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': import.meta.env.VITE_API_KEY,
-    'x-api-secret': import.meta.env.VITE_API_SECRET,
-  },
-  body: JSON.stringify({
-     type: "onramp",
+      const response = await axios.post('/api/api/swypt-quotes', {
+  
+  type: "onramp",
   amount: "1",
   fiatCurrency: "KES",
   cryptoCurrency: "USDT", //cKes, USDC
   network: "lisk",
-  })
- 
-}, 
-// {
-//   headers: {
-//     'Content-Type': 'application/json',
-//     'x-api-key': import.meta.env.VITE_API_KEY,
-//     'x-api-secret': import.meta.env.VITE_API_SECRET,
-//   }
-// }
-);
-const requiredData =await  response.json();
-console.log(requiredData);
+  },
+  {
+     headers: {
+    'Content-Type': 'application/json',
+  },
+
+});
+const requiredData =await  response.data.data;
+setResponseObject(requiredData);
+console.log("requiredData",requiredData);
     }catch(error) {
-      console.error(error);
+      console.log('this is the error',error);
     }
     };
     getExchangeRate();
@@ -107,6 +99,53 @@ console.log(requiredData);
     setCopyButtonState('copying');
     setTimeout(() => setCopyButtonState('copy'), 2000);
   };
+
+  const onRampData = async() => {
+
+    try {
+      const userOnRampdata = await axios.post('/api/api/swypt-quotes', {
+  
+        type: "onramp",
+        amount: kenyanamount,
+        fiatCurrency: "KES",
+        cryptoCurrency: "USDT", //cKes, USDC
+        network: "lisk",
+        },
+        {
+           headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      const requiredData =await  userOnRampdata.data.data;
+      setResponseObject2(requiredData);
+      // console.log("requiredData",requiredData);
+    }catch(error) {
+      console.log('this is the error',error);
+    }
+  }
+
+  const stkRequest = async() => {
+
+    try {
+
+    const response = await axios.post('/api/api/swypt-onramp', {
+  partyA: phoneNumber,
+  amount: kenyanamount,
+  side: "onramp",
+  userAddress: recipentAddress2,
+  tokenAddress: liskUSDTAddress
+}, {
+   headers: {
+          'Content-Type': 'application/json',
+        }
+});
+const requiredData =await  response.data.data;
+setResponseObject3(requiredData);
+    }catch(error) {
+      console.log('this is the error',error);
+    }
+  }
+
 
   return (
     <section className="bg-[#eaeaea] min-h-screen flex  items-center justify-center">
@@ -230,7 +269,7 @@ console.log(requiredData);
             {activeTab === 'onramp' ? (
               <div className="space-y-3">
                 <p className="text-sm text-gray-600"> Payment method: MPESA</p>
-                {/* <p className="text-sm text-gray-600"> 1 KES ~ {getExchangeRate()}</p> */}
+                <p className="text-sm text-gray-600">1 Ksh ~ {(1/responseObject.exchangeRate).toFixed(2)} USDT</p>
                 {/* <button
                  className="w-full p-2 text-sm bg-gray-100 rounded-md hover:bg-gray-200">
                   MPESA
@@ -239,7 +278,7 @@ console.log(requiredData);
                     type="text"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder={"Enter your phone number"}
+                    placeholder={"254754920903"}
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
                   />
 
@@ -254,13 +293,14 @@ console.log(requiredData);
                   <input
                     type="number"
                     value={kenyanamount}
-                    onChange={(e) => setKenyanAmount(e.target.value)}
+                    onChange={(e) => {setKenyanAmount(e.target.value); onRampData()}}
                     placeholder={"100"}
                     className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-none `}
                   />
+                  <p className="text-sm text-gray-600">You recieve ~ {(Number(kenyanamount)/responseObject2.exchangeRate).toFixed(2)} USDT</p>
                   {/* Onramp button */}
                  <button
-                    onClick=""
+                    onClick={stkRequest}
                     disabled={isPending}
                     className="w-full mb-4 text-black p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-none focus:ring-gray-500   "
                   >

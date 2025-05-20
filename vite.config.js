@@ -5,6 +5,19 @@ import dotenv from 'dotenv';
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://pool.swypt.io/',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        headers: {
+          'x-api-key': '9900ca9c16becead5ac6dd3f6fa6b534',
+          'x-api-secret': '70779dd4d5e39e71a2460d701ec6e9001b191c21765d40499eec29d660d3e31c'
+        }
+      }
+    }
+  },
   plugins: [
     tailwindcss(),
     react()
